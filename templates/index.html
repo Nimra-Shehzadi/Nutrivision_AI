@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NutriVision AI - Premium Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        :root { --primary-grad: linear-gradient(135deg, #1a0033 0%, #4b0082 50%, #1a0033 100%); --accent-color: #bb86fc; --glass: rgba(255, 255, 255, 0.08); }
+        body { background: var(--primary-grad); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; min-height: 100vh; overflow-y: auto; }
+        
+        .shape { position: fixed; background: rgba(187, 134, 252, 0.07); z-index: -1; animation: moveAround 20s infinite alternate linear; }
+        @keyframes moveAround { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(100px, 50px) rotate(360deg); } }
+        .shape-1 { width: 300px; height: 300px; top: -50px; left: -50px; border-radius: 40%; }
+        .shape-2 { width: 180px; height: 180px; bottom: 5%; right: 5%; border-radius: 50%; }
+
+        .swiper { width: 100%; max-width: 1000px; padding: 40px 0; }
+        .swiper-slide { width: 320px; height: 380px; background: var(--glass); border-radius: 20px; border: 1px solid var(--accent-color); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 25px; box-sizing: border-box; text-align: center; }
+
+        .card { background: var(--glass); padding: 30px; border-radius: 25px; width: 90%; max-width: 600px; margin: 25px auto; border: 1px solid var(--accent-color); backdrop-filter: blur(15px); box-sizing: border-box; }
+        input, select { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; background: #1a1e26; color: white; border: 1px solid #444; box-sizing: border-box; display: block;}
+        .btn-nav { padding: 12px 25px; border-radius: 30px; border: none; cursor: pointer; font-weight: bold; color: white; margin: 10px; transition: 0.3s; }
+        .scanner-btn { background: linear-gradient(90deg, #bb86fc, #6200ee); }
+        .consult-btn { background: linear-gradient(90deg, #03dac6, #018786); }
+        .hidden { display: none !important; }
+
+        .prog-container { width: 100%; height: 30px; background: #333; border-radius: 15px; display: flex; overflow: hidden; margin-top: 15px; border: 1px solid #555; }
+        .summary-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 20px; margin-top: 15px; }
+
+        /* NUTRITION TABLE STYLE */
+        .nutrition-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; }
+        .nutrition-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; font-size: 14px; }
+        .nutrition-table b { color: #bb86fc; }
+
+        .booklet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .booklet-content { background: #1a1e26; border: 2px solid #03dac6; padding: 30px; border-radius: 25px; width: 90%; max-width: 550px; text-align: left; max-height: 85vh; overflow-y: auto; position: relative; }
+    </style>
+</head>
+<body>
+    <div class="shape shape-1"></div><div class="shape shape-2"></div>
+
+    <div style="padding: 20px;">
+        <h1>🥗 NUTRIVISION AI</h1>
+        
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3342/3342137.png" width="70">
+                    <h3 style="font-weight: bold;">Step 1: Upload Meal</h3>
+                    <p style="font-size: 14px;">Take a clear photo of your food. Ensure good lighting for the AI to recognize patterns.</p>
+                </div>
+                <div class="swiper-slide">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png" width="70">
+                    <h3 style="font-weight: bold;">Step 2: AI Neural Scan</h3>
+                    <p style="font-size: 14px;">The model processes pixels using CNN layers to extract nutritional data and calories.</p>
+                </div>
+                <div class="swiper-slide">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2750/2750657.png" width="70">
+                    <h3 style="font-weight: bold;">Step 3: Daily Summary</h3>
+                    <p style="font-size: 14px;">Monitor your daily intake and get a professional report based on your clinical profile.</p>
+                </div>
+            </div>
+            <div class="swiper-button-next"></div><div class="swiper-button-prev"></div>
+        </div>
+
+        <div>
+            <button onclick="showTab('scanner')" class="btn-nav scanner-btn">NUTRITION SCANNER</button>
+            <button onclick="showTab('consult')" class="btn-nav consult-btn">AI CONSULTANT</button>
+        </div>
+
+        <div id="scanner" class="card {% if active_tab == 'consult' %}hidden{% endif %}">
+            <div style="background: rgba(0, 210, 255, 0.1); padding: 15px; border-radius: 15px; border: 1px dashed #00d2ff; margin-bottom: 20px;">
+                <h3>💧 Water Intake Tracker</h3>
+                <p>Goal: 8 Glasses | Current: <span id="waterCount">0</span></p>
+                <div class="prog-container" style="height: 12px;"><div id="waterBar" style="width: 0%; background: #00d2ff;"></div></div>
+                <button onclick="addWater()" class="btn-nav scanner-btn" style="padding: 5px 15px; font-size: 12px;">+ Add Glass</button>
+            </div>
+
+            <h2>Food Recognition</h2>
+            <form method="post" enctype="multipart/form-data">
+                <input type="file" name="file" required>
+                <div style="margin: 15px 0;">
+                    <label>Portion Size: <b id="pText">1.0</b>x</label>
+                    <input type="range" name="portion" min="0.5" max="2.0" step="0.5" value="1.0" oninput="document.getElementById('pText').innerText=this.value">
+                </div>
+                <button type="submit" class="btn-nav scanner-btn" style="width:100%">START SCANNING</button>
+            </form>
+
+            {% if label %}
+            <div style="margin-top:20px">
+                <h3 style="color:#bb86fc">{{ label }} (Confidence: {{ conf }})</h3>
+                <img src="{{ img_path }}" width="100%" style="border-radius:15px; border: 2px solid #bb86fc">
+                
+                <table class="nutrition-table">
+                    <tr><td>🔥 Calories</td><td><b>{{ info.Cal }} kcal</b></td></tr>
+                    <tr><td>🍗 Protein</td><td><b>{{ info.Prot }}</b></td></tr>
+                    <tr><td>🍞 Carbohydrates</td><td><b>{{ info.Carb }}</b></td></tr>
+                    <tr><td>🥓 Total Fat</td><td><b>{{ info.Fat }}</b></td></tr>
+                </table>
+
+                <div id="feedback-loop" style="margin-top:20px; padding:15px; background: rgba(187, 134, 252, 0.1); border-radius:15px; border: 1px dashed var(--accent-color);">
+    <h4 style="margin:0 0 10px 0; color:var(--accent-color);">Incorrect Prediction?</h4>
+    <p style="font-size: 13px; margin-bottom: 10px;">Help the AI learn by entering the correct dish name below:</p>
+    
+    <div style="display: flex; gap: 8px;">
+        <input type="text" id="user-correction" placeholder="e.g. Chicken Karahi" style="margin:0; flex: 2; height: 40px;">
+        <button type="button" onclick="submitCorrection()" class="btn-nav scanner-btn" style="margin:0; flex: 1; font-size: 12px; height: 40px; padding: 0;">Submit</button>
+    </div>
+    
+    <p id="feedback-success" style="display:none; color: #03dac6; font-size: 12px; margin-top: 10px; font-weight: bold;">
+        ✔ Correction recorded. Thank you for improving NutriVision AI!
+    </p>
+</div>
+            </div>
+            {% endif %}
+
+            {% if history %}
+            <div style="margin-top:30px;">
+                <h3>📊 Dietary Insights</h3>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                    <div style="width: 140px;"><canvas id="dietChart"></canvas></div>
+                    <div style="flex: 1;">
+                        <div class="prog-container">
+                            <div style="width: {{ progress.percent }}%; background: #00ff99; color: black; line-height:30px;">Healthy {{ progress.percent }}%</div>
+                            <div style="width: {{ 100 - progress.percent }}%; background: #ff4b2b; color: white; line-height:30px;">Junk</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="summary-card">
+                    <h4>📅 Daily Nutrition Summary</h4>
+                    <p>Total Consumed: <b>{{ progress.daily_cal }} kcal</b></p>
+                </div>
+
+                <div class="summary-card" style="text-align: left;">
+                    <h4>🕒 Food History Timeline</h4>
+                    <div style="max-height: 150px; overflow-y: auto;">
+                        {% for h in history[::-1] %}
+                        <p style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">
+                            • {{ h.time }} — <b>{{ h.food }}</b> ({{ h.type }})
+                        </p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div id="consult" class="card {% if active_tab == 'scanner' %}hidden{% endif %}" style="border-color:#03dac6">
+            <h2>AI Health Consultant</h2>
+            <form method="post">
+                <input type="number" name="age" placeholder="Enter Age" required>
+                <input type="number" name="weight" placeholder="Weight (kg)" required>
+                <select name="diabetes"><option value="no">Non-Diabetic</option><option value="yes">Diabetic</option></select>
+                <select name="bp"><option value="no">Normal BP</option><option value="yes">High BP</option></select>
+                <select name="activity"><option value="low">Low Activity</option><option value="moderate">Moderate Activity</option><option value="high">High Activity</option></select>
+                <button type="submit" class="btn-nav consult-btn" style="width:100%">GENERATE REPORT</button>
+            </form>
+        </div>
+    </div>
+
+    {% if full_advice %}
+    <div id="booklet" class="booklet-overlay">
+        <div class="booklet-content">
+            <h2 style="color:#03dac6; text-align:center">📘 Professional Wellness Report</h2>
+            <hr>
+            <b>Clinical Profile:</b> <ul>{% for s in full_advice.summary %}<li>{{ s }}</li>{% endfor %}</ul>
+            <b style="color:#00ff99">✅ Recommended Foods:</b> <ul>{% for f in full_advice.follow %}<li>{{ f }}</li>{% endfor %}</ul>
+            <b style="color:#ff4b2b">❌ Foods to Avoid:</b> <ul>{% for a in full_advice.avoid %}<li>{{ a }}</li>{% endfor %}</ul>
+            <b style="color:#bb86fc">🍽️ Daily Diet Plan:</b> <ul>{% for d in full_advice.diet %}<li>{{ d }}</li>{% endfor %}</ul>
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button onclick="window.print()" class="btn-nav scanner-btn" style="flex:1">Export PDF</button>
+                <button onclick="closeReport()" class="btn-nav consult-btn" style="flex:1">Close</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        var swiper = new Swiper(".mySwiper", { effect: "coverflow", grabCursor: true, centeredSlides: true, slidesPerView: "auto", coverflowEffect: { rotate: 50, stretch: 0, depth: 100, modifier: 1, slideShadows: true }, navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" } });
+        
+        function showTab(id) { 
+            document.getElementById('scanner').classList.add('hidden'); 
+            document.getElementById('consult').classList.add('hidden'); 
+            document.getElementById(id).classList.remove('hidden'); 
+        }
+
+        function closeReport() {
+            document.getElementById('booklet').style.display = 'none';
+        }
+
+        let glasses = 0; function addWater() { if (glasses < 8) { glasses++; document.getElementById('waterCount').innerText = glasses; document.getElementById('waterBar').style.width = (glasses/8*100)+'%'; } }
+        
+        {% if progress %}
+        new Chart(document.getElementById('dietChart'), { type: 'doughnut', data: { labels: ['Healthy', 'Junk'], datasets: [{ data: [{{ progress.healthy }}, {{ progress.junk }}], backgroundColor: ['#00ff99', '#ff4b2b'], borderWidth: 0 }] }, options: { plugins: { legend: { display: false } }, cutout: '75%' } });
+        {% endif %}
+
+        // Function to handle AI correction feedback
+function submitCorrection() {
+    const correctionValue = document.getElementById('user-correction').value;
+    const successMsg = document.getElementById('feedback-success');
+    
+    if (correctionValue.trim() !== "") {
+        // Technical Explanation: This simulates sending data to the backend for retraining
+        console.log("User Correction Received: " + correctionValue);
+        
+        // Show success message
+        successMsg.style.display = 'block';
+        document.getElementById('user-correction').value = ""; // Clear input
+        
+        // Hide message after a few seconds
+        setTimeout(() => {
+            successMsg.style.display = 'none';
+        }, 4000);
+    } else {
+        alert("Please enter the correct dish name.");
+    }
+}
+    </script>
+</body>
+</html>
